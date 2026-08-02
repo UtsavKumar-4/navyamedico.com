@@ -216,6 +216,20 @@
   }
   .upi-btn.visible{display:flex;}
   .upi-btn:hover{background:var(--pine-light);}
+  .upi-qr-toggle{
+    width:100%;background:transparent;color:var(--pine);border:1.5px solid var(--pine);
+    padding:11px;border-radius:100px;font-weight:600;font-size:13.5px;cursor:pointer;
+    display:none;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;
+    font-family:'Inter',sans-serif;transition:background .15s,color .15s;
+  }
+  .upi-qr-toggle.visible{display:flex;}
+  .upi-qr-toggle:hover{background:var(--pine);color:#fff;}
+  .upi-qr-box{
+    background:var(--paper);border:1px solid var(--foil-line);border-radius:12px;
+    padding:16px;text-align:center;margin-bottom:10px;
+  }
+  .upi-qr-box #qrCodeCanvas{display:flex;justify-content:center;margin-bottom:10px;}
+  .qr-note{font-size:12px;color:var(--ink-soft);}
   .toast{
     position:fixed;bottom:90px;right:22px;max-width:300px;
     background:var(--pine);color:#fff;padding:12px 18px;border-radius:10px;
@@ -393,6 +407,7 @@
     *{transition:none !important;}
   }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -546,6 +561,11 @@
     <input type="tel" id="custPhone" placeholder="Your phone number">
     <textarea id="custAddress" placeholder="Delivery address (or write 'Pickup')" rows="2"></textarea>
     <button class="upi-btn" id="upiPayBtn">📲 Pay ₹<span id="upiAmount">0</span> via UPI</button>
+    <button class="upi-qr-toggle" id="upiQrToggle">📷 Show QR to pay</button>
+    <div class="upi-qr-box" id="upiQrBox" style="display:none;">
+      <div id="qrCodeCanvas"></div>
+      <div class="qr-note">Scan with any UPI app (GPay, PhonePe, Paytm) to pay ₹<span id="qrAmount">0</span></div>
+    </div>
     <button class="whatsapp-btn" id="sendOrder">💬 Send order on WhatsApp</button>
     <div class="rx-note">If your cart has a "Rx required" item, please attach the prescription photo in the WhatsApp chat.</div>
   </div>
@@ -880,6 +900,9 @@
   const cartFoot = document.getElementById('cartFoot');
   const upiPayBtn = document.getElementById('upiPayBtn');
   const upiAmountEl = document.getElementById('upiAmount');
+  const upiQrToggle = document.getElementById('upiQrToggle');
+  const upiQrBox = document.getElementById('upiQrBox');
+  const qrAmountEl = document.getElementById('qrAmount');
 
   function openCart(){ cartDrawer.classList.add('open'); cartOverlay.classList.add('open'); }
   function closeCart(){ cartDrawer.classList.remove('open'); cartOverlay.classList.remove('open'); }
@@ -887,14 +910,45 @@
   cartClose.addEventListener('click', closeCart);
   cartOverlay.addEventListener('click', closeCart);
 
-  function updateUpiVisibility(total){
-    if(settings.upiId){
+  function cartTotal(){
+    return Object.values(cart).reduce((sum, it) => sum + it.price * it.qty, 0);
+  }
+
+  function buildUpiUrl(amount){
+    return `upi://pay?pa=${encodeURIComponent(settings.upiId)}&pn=${encodeURIComponent('Navya Medico')}&am=${amount}&cu=INR&tn=${encodeURIComponent('Order from website')}`;
+  }
+
+  function renderUpiQr(amount){
+    const box = document.getElementById('qrCodeCanvas');
+    box.innerHTML = '';
+    if(typeof QRCode === 'undefined' || !amount) return;
+    new QRCode(box, {
+      text: buildUpiUrl(amount),
+      width: 200, height: 200,
+      colorDark: '#16342A', colorLight: '#ffffff'
+    });
+    qrAmountEl.textContent = amount;
+  }
+
+  function updateUpiVisibility(){
+    const total = cartTotal();
+    if(settings.upiId && total > 0){
       upiPayBtn.classList.add('visible');
-      if(typeof total === 'number') upiAmountEl.textContent = total;
+      upiQrToggle.classList.add('visible');
+      upiAmountEl.textContent = total;
+      if(upiQrBox.style.display === 'block') renderUpiQr(total);
     } else {
       upiPayBtn.classList.remove('visible');
+      upiQrToggle.classList.remove('visible');
+      upiQrBox.style.display = 'none';
     }
   }
+
+  upiQrToggle.addEventListener('click', () => {
+    const opening = upiQrBox.style.display !== 'block';
+    upiQrBox.style.display = opening ? 'block' : 'none';
+    if(opening) renderUpiQr(cartTotal());
+  });
 
   function renderCart(){
     const items = Object.values(cart);
@@ -903,6 +957,7 @@
     if(items.length === 0){
       cartItemsEl.innerHTML = '<div class="cart-empty">Your cart is empty. Add medicines to get started.</div>';
       cartFoot.style.display = 'none';
+      updateUpiVisibility();
       return;
     }
     cartFoot.style.display = 'block';
@@ -924,7 +979,7 @@
       </div>`;
     }).join('');
     cartItemsEl.innerHTML = rows + `<div class="cart-total"><span>Total</span><span>₹${total}</span></div>`;
-    updateUpiVisibility(total);
+    updateUpiVisibility();
   }
 
   cartItemsEl.addEventListener('click', e => {
@@ -1010,11 +1065,9 @@ Delivery: ${address || 'Not specified — please ask'}`;
 
   // ---------- Pay via UPI ----------
   upiPayBtn.addEventListener('click', () => {
-    const items = Object.values(cart);
-    if(items.length === 0 || !settings.upiId) return;
-    const total = items.reduce((sum, it) => sum + it.price * it.qty, 0);
-    const upiUrl = `upi://pay?pa=${encodeURIComponent(settings.upiId)}&pn=${encodeURIComponent('Navya Medico')}&am=${total}&cu=INR&tn=${encodeURIComponent('Order from website')}`;
-    window.location.href = upiUrl;
+    const total = cartTotal();
+    if(total === 0 || !settings.upiId) return;
+    window.location.href = buildUpiUrl(total);
   });
 
   renderCart();
