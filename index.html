@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Navya Medico — Wholesale &amp; Retail Chemist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pine:#16342A; --pine-light:#2B5940; --paper:#F6F5EF; --amber:#D98A2B; --amber-deep:#B56E1B;
+    --ink:#1C1E1B; --ink-soft:#4A4D46; --foil:#E1E7DD; --foil-line:#C9D4C4; --white:#FFFDF9;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;line-height:1.6;min-height:100vh;display:flex;flex-direction:column;}
+  h1,h2{font-family:'Fraunces',serif;font-weight:600;color:var(--pine);}
+  a{color:inherit;text-decoration:none;}
+
+  header{padding:26px 24px 0;text-align:center;}
+  .brand{display:inline-flex;align-items:center;gap:10px;}
+  .rx-mark{width:40px;height:40px;border-radius:50%;background:var(--pine);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:19px;}
+  .brand-text{text-align:left;line-height:1.15;}
+  .brand-text .name{font-family:'Fraunces',serif;font-weight:700;font-size:20px;color:var(--pine);display:block;}
+  .brand-text .sub{font-size:11px;letter-spacing:0.07em;text-transform:uppercase;color:var(--ink-soft);}
+
+  main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;}
+  .lead h1{font-size:clamp(28px,4vw,40px);text-align:center;margin-bottom:10px;}
+  .lead p{text-align:center;color:var(--ink-soft);font-size:15px;max-width:480px;margin:0 auto 40px;}
+
+  .choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;max-width:760px;width:100%;}
+  .choice-card{
+    background:var(--white);border:1px solid var(--foil-line);border-radius:18px;padding:32px 26px;
+    text-align:center;transition:transform .15s, box-shadow .15s, border-color .15s;
+  }
+  .choice-card:hover{transform:translateY(-4px);box-shadow:0 20px 36px -20px rgba(22,52,42,0.35);border-color:var(--pine-light);}
+  .choice-card .ci{font-size:38px;margin-bottom:14px;display:block;}
+  .choice-card h2{font-size:20px;margin-bottom:8px;}
+  .choice-card p{font-size:13.5px;color:var(--ink-soft);margin-bottom:20px;min-height:40px;}
+  .choice-card .go-btn{
+    display:inline-flex;align-items:center;gap:8px;background:var(--pine);color:#fff;padding:11px 22px;
+    border-radius:100px;font-weight:600;font-size:13.5px;transition:background .15s;
+  }
+  .choice-card.wholesale .go-btn{background:var(--amber);}
+  .choice-card:hover .go-btn{background:var(--pine-light);}
+  .choice-card.wholesale:hover .go-btn{background:var(--amber-deep);}
+  .choice-card .tag{
+    display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--pine-light);
+    background:var(--foil);border-radius:100px;padding:3px 10px;margin-bottom:14px;
+  }
+  .choice-card.wholesale .tag{color:var(--amber-deep);background:#FBF1E2;}
+
+  footer{text-align:center;padding:24px 20px 30px;font-size:12.5px;color:var(--ink-soft);}
+  footer a{text-decoration:underline;}
+  footer .contact-line{margin-top:6px;}
+
+  @media (max-width:620px){
+    .choice-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="rx-mark">℞</div>
+    <div class="brand-text">
+      <span class="name">Navya Medico</span>
+      <span class="sub">Wholesale &amp; Retail Chemist</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="lead">
+    <h1>Who's ordering today?</h1>
+    <p>Choose retail for everyday household medicines, or wholesale for bulk pricing if you run a clinic or pharmacy.</p>
+  </div>
+
+  <div class="choice-grid">
+    <a href="retail.html" class="choice-card">
+      <span class="tag">MIN. ORDER ₹500</span>
+      <span class="ci">🏠</span>
+      <h2>Retail customer</h2>
+      <p>Prescription refills, everyday wellness, home delivery for your household.</p>
+      <span class="go-btn">Shop retail →</span>
+    </a>
+
+    <a href="wholesale.html" class="choice-card wholesale">
+      <span class="tag">MIN. ORDER ₹2,000</span>
+      <span class="ci">🏥</span>
+      <h2>Wholesale / bulk buyer</h2>
+      <p>Clinics, nursing homes &amp; pharmacies — bulk rates and scheduled supply.</p>
+      <span class="go-btn">Shop wholesale →</span>
+    </a>
+  </div>
+</main>
+
+<footer>
+  <div>Janardan Complex, Behind PHC Hospital Kanti, Kanti, Muzaffarpur, Bihar – 843109</div>
+  <div class="contact-line">📞 <a href="tel:+919199857464">91998 57464</a> · 💬 <a href="https://wa.me/919199857464">WhatsApp</a> · ✉️ <a href="mailto:navyamedico2020@gmail.com">navyamedico2020@gmail.com</a></div>
+</footer>
+
+</body>
+</html>

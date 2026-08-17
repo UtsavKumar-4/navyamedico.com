@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Navya Medico — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCIU2hoNW-WgsiOsFQTOtUSwgHoeb2NqrM",
+    authDomain: "navya-medico.firebaseapp.com",
+    projectId: "navya-medico",
+    storageBucket: "navya-medico.firebasestorage.app",
+    messagingSenderId: "168152319649",
+    appId: "1:168152319649:web:79d3c8283d7ef48f5f52e0",
+    measurementId: "G-LCEM6V9G76"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const nmDb = firebase.firestore();
+</script>
+<style>
+  :root{
+    --pine:#16342A; --pine-light:#2B5940; --paper:#F6F5EF; --paper-deep:#EEECE2;
+    --amber:#D98A2B; --amber-deep:#B56E1B; --ink:#1C1E1B; --ink-soft:#4A4D46;
+    --foil:#E1E7DD; --foil-line:#C9D4C4; --white:#FFFDF9; --radius:14px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;line-height:1.6;}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;color:var(--pine);}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;}
+
+  header{background:var(--pine);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;}
+  .brand{display:flex;align-items:center;gap:10px;color:var(--white);}
+  .rx-mark{width:34px;height:34px;border-radius:50%;background:var(--amber);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;}
+  .brand span{font-family:'Fraunces',serif;font-weight:700;font-size:17px;}
+  .brand small{display:block;font-size:10.5px;color:#BFD4C5;font-weight:400;letter-spacing:0.05em;text-transform:uppercase;}
+  header .links{display:flex;gap:16px;font-size:13px;}
+  header .links a{color:#DCEAE0;text-decoration:underline;}
+
+  .wrap{max-width:900px;margin:0 auto;padding:28px 20px 80px;}
+
+  /* login */
+  .login-box{max-width:360px;margin:60px auto;background:var(--white);border:1px solid var(--foil-line);border-radius:16px;padding:32px;text-align:center;}
+  .login-box h2{margin-bottom:6px;}
+  .login-box p{color:var(--ink-soft);font-size:13.5px;margin-bottom:20px;}
+  .login-box input{width:100%;padding:11px 13px;border:1px solid var(--foil-line);border-radius:9px;margin-bottom:12px;font-size:14px;background:var(--paper);}
+  .login-box button{width:100%;background:var(--pine);color:#fff;border:none;padding:12px;border-radius:100px;font-weight:600;cursor:pointer;}
+  .login-box button:hover{background:var(--pine-light);}
+  .login-error{color:var(--amber-deep);font-size:12.5px;margin-top:10px;min-height:16px;}
+  .login-note{font-size:11.5px;color:var(--ink-soft);margin-top:16px;border-top:1px dashed var(--foil-line);padding-top:14px;}
+
+  /* main admin */
+  .admin-tabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap;}
+  .admin-tab{padding:8px 16px;border-radius:100px;border:1px solid var(--foil-line);background:var(--white);font-size:13px;font-weight:500;color:var(--ink-soft);cursor:pointer;}
+  .admin-tab.active{background:var(--pine);color:#fff;border-color:var(--pine);}
+
+  .panel{background:var(--white);border:1px solid var(--foil-line);border-radius:var(--radius);padding:26px;margin-bottom:20px;}
+  .panel h3{font-size:17px;margin-bottom:16px;}
+
+  .admin-body input,.admin-body select{
+    width:100%;padding:10px 12px;border:1px solid var(--foil-line);border-radius:9px;font-size:13.5px;
+    margin-bottom:10px;font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);
+  }
+  label{font-size:12px;color:var(--ink-soft);display:block;margin-bottom:4px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .save-btn{background:var(--pine);color:#fff;border:none;padding:11px 22px;border-radius:100px;font-weight:600;font-size:13.5px;cursor:pointer;}
+  .save-btn:hover{background:var(--pine-light);}
+  .cancel-btn{background:var(--ink-soft);color:#fff;border:none;padding:11px 22px;border-radius:100px;font-weight:600;font-size:13.5px;cursor:pointer;margin-left:8px;display:none;}
+
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:20px;}
+  th{text-align:left;color:var(--ink-soft);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:0.03em;padding:6px 8px;border-bottom:1px solid var(--foil-line);}
+  td{padding:8px;border-bottom:1px solid var(--foil-line);vertical-align:top;}
+  .rx-tag{font-size:9.5px;color:var(--amber-deep);background:#FBF1E2;border:1px dashed #E8C48A;padding:1px 5px;border-radius:5px;margin-left:4px;}
+  .row-actions button{background:none;border:none;cursor:pointer;font-size:13px;margin-right:8px;color:var(--pine-light);}
+  .row-actions button.danger{color:var(--amber-deep);}
+  .order-status-select{padding:5px 8px;border-radius:7px;border:1px solid var(--foil-line);font-size:12px;background:var(--paper);}
+  .store-tag{font-size:10px;text-transform:uppercase;padding:2px 7px;border-radius:6px;background:var(--foil);color:var(--pine);}
+  .store-tag.wholesale{background:#FBF1E2;color:var(--amber-deep);}
+
+  .stat-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+  .stat-card{background:var(--white);border:1px solid var(--foil-line);border-radius:12px;padding:18px;}
+  .stat-card .num{font-family:'Fraunces',serif;font-size:26px;color:var(--pine);}
+  .stat-card .label{font-size:12px;color:var(--ink-soft);margin-top:4px;}
+
+  .toast{
+    position:fixed;bottom:24px;right:22px;max-width:320px;background:var(--pine);color:#fff;padding:12px 18px;
+    border-radius:10px;font-size:13.5px;box-shadow:0 10px 24px -10px rgba(0,0,0,0.4);z-index:200;
+    opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .2s, transform .2s;
+  }
+  .toast.show{opacity:1;transform:translateY(0);}
+  .toast.error{background:var(--amber-deep);}
+
+  @media (max-width:640px){
+    .row2,.row3{grid-template-columns:1fr;}
+    .stat-cards{grid-template-columns:1fr;}
+    header .links{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="rx-mark">℞</div>
+    <div>
+      <span>Navya Medico</span>
+      <small>Admin</small>
+    </div>
+  </div>
+  <div class="links">
+    <a href="index.html">View site</a>
+    <a href="retail.html">Retail store</a>
+    <a href="wholesale.html">Wholesale portal</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="login-box" id="loginBox">
+    <h2>Admin login</h2>
+    <p>Enter the shop admin password to manage medicines, stock, pricing and payments.</p>
+    <input type="password" id="passInput" placeholder="Password">
+    <button id="loginBtn">Unlock</button>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-note">Default password is <b>navya2026</b>. This is a simple screen-lock, not real account security — anyone with the page source can see it, so don't use it to gate anything sensitive.</div>
+  </div>
+
+  <div id="adminMain" style="display:none;">
+
+    <div class="stat-cards">
+      <div class="stat-card"><div class="num" id="statCount">0</div><div class="label">Medicines listed</div></div>
+      <div class="stat-card"><div class="num" id="statLowStock">0</div><div class="label">Low / no stock (&lt; 5)</div></div>
+      <div class="stat-card"><div class="num" id="statExpiring">0</div><div class="label">Expiring within 60 days</div></div>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-atab="meds">Medicines &amp; stock</button>
+      <button class="admin-tab" data-atab="orders">Orders</button>
+      <button class="admin-tab" data-atab="pay">Payment (UPI)</button>
+    </div>
+
+    <div id="medsTab">
+      <div class="panel admin-body">
+        <h3 id="formTitle">Add medicine</h3>
+        <form id="medForm">
+          <input type="hidden" id="medId">
+          <label for="medName">Medicine name</label>
+          <input type="text" id="medName" placeholder="e.g. Paracetamol 500mg" required>
+
+          <div class="row2">
+            <div><label for="medCompany">Company / Manufacturer</label><input type="text" id="medCompany" placeholder="e.g. Cipla"></div>
+            <div><label for="medType">Type</label>
+              <select id="medType">
+                <option value="generic">Generic</option>
+                <option value="ethical">Ethical (branded)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row2">
+            <div><label for="medCategory">Category</label>
+              <select id="medCategory">
+                <option value="otc">OTC &amp; Wellness</option>
+                <option value="prescription">Prescription</option>
+                <option value="ayurvedic">Ayurvedic</option>
+                <option value="surgical">Surgical</option>
+                <option value="baby">Baby Care</option>
+              </select>
+            </div>
+            <div><label for="medPack">Pack size</label><input type="text" id="medPack" placeholder="e.g. Strip of 10"></div>
+          </div>
+
+          <div class="row3">
+            <div><label for="medMrp">MRP (₹)</label><input type="number" id="medMrp" min="0" step="0.01" required></div>
+            <div><label for="medDiscount">Discount %</label><input type="number" id="medDiscount" min="0" max="100" step="1" value="0"></div>
+            <div><label for="medStock">Stock (units)</label><input type="number" id="medStock" min="0" step="1" value="0"></div>
+          </div>
+
+          <div class="row2">
+            <div><label for="medBatch">Batch no.</label><input type="text" id="medBatch" placeholder="e.g. B-2201"></div>
+            <div><label for="medExpiry">Expiry (month/year)</label><input type="month" id="medExpiry"></div>
+          </div>
+
+          <div class="row2" style="margin-bottom:14px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="checkbox" id="medRx" style="width:auto;margin:0;"> <label for="medRx" style="margin:0;">Rx required</label>
+            </div>
+          </div>
+
+          <button type="submit" class="save-btn" id="medSaveBtn">Add medicine</button>
+          <button type="button" class="cancel-btn" id="medCancelBtn">Cancel edit</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h3>Catalogue</h3>
+        <p style="font-size:12px;color:var(--ink-soft);">Same medicine name can be listed more than once with a different batch number / expiry / stock — each row is its own batch.</p>
+        <table>
+          <thead><tr><th>Name</th><th>Type</th><th>MRP</th><th>Disc.</th><th>Price</th><th>Stock</th><th>Batch</th><th>Expiry</th><th></th></tr></thead>
+          <tbody id="medTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="ordersTab" style="display:none;">
+      <div class="stat-cards" id="salesStatCards">
+        <div class="stat-card"><div class="num" id="statTodayOrders">0</div><div class="label">Orders today</div></div>
+        <div class="stat-card"><div class="num" id="statTodaySales">₹0</div><div class="label">Sales today</div></div>
+        <div class="stat-card"><div class="num" id="statPendingOrders">0</div><div class="label">Pending / not delivered</div></div>
+      </div>
+      <div class="panel">
+        <h3>All orders</h3>
+        <p style="font-size:12px;color:var(--ink-soft);">Newest first. Update status as you confirm, pack and deliver each order.</p>
+        <table>
+          <thead><tr><th>Order ID</th><th>Store</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>Placed</th></tr></thead>
+          <tbody id="ordersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="payTab" style="display:none;">
+      <div class="panel admin-body">
+        <h3>UPI payment</h3>
+        <label for="upiIdInput">Shop UPI ID (VPA)</label>
+        <input type="text" id="upiIdInput" placeholder="e.g. navyamedico@okicici">
+        <button class="save-btn" id="saveUpiBtn">Save UPI ID</button>
+        <p style="font-size:12px;color:var(--ink-soft);margin-top:14px;">Once saved, customers on retail.html and wholesale.html see a "Pay via UPI" button and QR code in their cart with the order amount pre-filled.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function escapeHtml(str){
+    return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function showToast(msg, isError){
+    let t = document.getElementById('nmToast');
+    if(!t){
+      t = document.createElement('div');
+      t.id = 'nmToast';
+      t.className = 'toast';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.className = 'toast show' + (isError ? ' error' : '');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  async function loadShared(key, fallback){
+    try{
+      const doc = await nmDb.collection('navya_medico').doc(key).get();
+      if(doc.exists) return doc.data().value;
+      return fallback;
+    }catch(err){
+      console.error('Firestore load failed for', key, err);
+      try{
+        const raw = localStorage.getItem('nm_' + key);
+        return raw ? JSON.parse(raw) : fallback;
+      }catch(err2){ return fallback; }
+    }
+  }
+  async function saveShared(key, value){
+    let ok = false;
+    try{
+      await nmDb.collection('navya_medico').doc(key).set({ value, updatedAt: Date.now() });
+      ok = true;
+    }catch(err){
+      console.error('Firestore save failed for', key, err);
+    }
+    try{
+      localStorage.setItem('nm_' + key, JSON.stringify(value));
+    }catch(err2){}
+    return ok;
+  }
+
+  function finalPrice(p){
+    const disc = Number(p.discount) || 0;
+    return Math.round(Number(p.mrp) * (1 - disc / 100));
+  }
+
+  let catalog = [];
+  let settings = { upiId:'' };
+
+  nmDb.collection('navya_medico').doc('catalog').onSnapshot(doc => {
+    catalog = (doc.exists && doc.data().value) ? doc.data().value : [];
+    renderTable();
+    renderStats();
+  }, err => console.error('Catalogue sync error', err));
+
+  nmDb.collection('navya_medico').doc('settings').onSnapshot(doc => {
+    settings = (doc.exists && doc.data().value) ? doc.data().value : { upiId:'' };
+    document.getElementById('upiIdInput').value = settings.upiId || '';
+  }, err => console.error('Settings sync error', err));
+
+  function renderStats(){
+    document.getElementById('statCount').textContent = catalog.length;
+    document.getElementById('statLowStock').textContent = catalog.filter(p => (Number(p.stock) || 0) < 5).length;
+    const now = new Date();
+    const in60 = new Date(now.getTime() + 60*24*60*60*1000);
+    document.getElementById('statExpiring').textContent = catalog.filter(p => {
+      if(!p.expiry) return false;
+      const exp = new Date(p.expiry + '-01');
+      return exp <= in60;
+    }).length;
+  }
+
+  function renderTable(){
+    const tbody = document.getElementById('medTableBody');
+    if(catalog.length === 0){
+      tbody.innerHTML = '<tr><td colspan="9" style="color:var(--ink-soft);">No medicines added yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = catalog.map(p => {
+      const price = finalPrice(p);
+      const stock = Number(p.stock) || 0;
+      const stockColor = stock < 5 ? 'color:var(--amber-deep);font-weight:600;' : '';
+      return `<tr data-id="${p.id}">
+        <td>${escapeHtml(p.name)}${p.rx ? '<span class="rx-tag">Rx</span>' : ''}<br><span style="color:var(--ink-soft);">${escapeHtml(p.pack || '')}${p.company ? ' · ' + escapeHtml(p.company) : ''}</span></td>
+        <td>${p.type === 'ethical' ? 'Ethical' : 'Generic'}</td>
+        <td>₹${p.mrp}</td>
+        <td>${p.discount || 0}%</td>
+        <td>₹${price}</td>
+        <td style="${stockColor}">${stock}</td>
+        <td>${escapeHtml(p.batch || '—')}</td>
+        <td>${escapeHtml(p.expiry || '—')}</td>
+        <td class="row-actions">
+          <button class="e-edit">Edit</button>
+          <button class="e-delete danger" data-confirm="0">Delete</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('medTableBody').addEventListener('click', async (e) => {
+    const row = e.target.closest('tr');
+    if(!row) return;
+    const id = row.dataset.id;
+    const item = catalog.find(p => p.id === id);
+    if(!item) return;
+
+    if(e.target.classList.contains('e-edit')){
+      document.getElementById('medId').value = item.id;
+      document.getElementById('medName').value = item.name || '';
+      document.getElementById('medCompany').value = item.company || '';
+      document.getElementById('medType').value = item.type || 'generic';
+      document.getElementById('medCategory').value = item.category || 'otc';
+      document.getElementById('medPack').value = item.pack || '';
+      document.getElementById('medMrp').value = item.mrp || 0;
+      document.getElementById('medDiscount').value = item.discount || 0;
+      document.getElementById('medStock').value = item.stock || 0;
+      document.getElementById('medBatch').value = item.batch || '';
+      document.getElementById('medExpiry').value = item.expiry || '';
+      document.getElementById('medRx').checked = !!item.rx;
+      document.getElementById('formTitle').textContent = 'Edit medicine';
+      document.getElementById('medSaveBtn').textContent = 'Save changes';
+      document.getElementById('medCancelBtn').style.display = 'inline-block';
+      document.getElementById('medForm').scrollIntoView({ behavior:'smooth', block:'start' });
+    } else if(e.target.classList.contains('e-delete')){
+      if(e.target.dataset.confirm !== '1'){
+        e.target.dataset.confirm = '1';
+        e.target.textContent = 'Tap again';
+        clearTimeout(e.target._t);
+        e.target._t = setTimeout(() => { e.target.dataset.confirm = '0'; e.target.textContent = 'Delete'; }, 3000);
+        return;
+      }
+      catalog = catalog.filter(p => p.id !== id);
+      const saved = await saveShared('catalog', catalog);
+      renderTable();
+      renderStats();
+      showToast(saved ? 'Medicine removed.' : 'Removed on screen, but could not persist.', !saved);
+    }
+  });
+
+  function resetForm(){
+    document.getElementById('medForm').reset();
+    document.getElementById('medId').value = '';
+    document.getElementById('formTitle').textContent = 'Add medicine';
+    document.getElementById('medSaveBtn').textContent = 'Add medicine';
+    document.getElementById('medCancelBtn').style.display = 'none';
+  }
+  document.getElementById('medCancelBtn').addEventListener('click', resetForm);
+
+  document.getElementById('medForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('medId').value || ('p' + Date.now());
+    const entry = {
+      id,
+      name: document.getElementById('medName').value.trim(),
+      company: document.getElementById('medCompany').value.trim(),
+      type: document.getElementById('medType').value,
+      category: document.getElementById('medCategory').value,
+      pack: document.getElementById('medPack').value.trim(),
+      mrp: parseFloat(document.getElementById('medMrp').value) || 0,
+      discount: parseFloat(document.getElementById('medDiscount').value) || 0,
+      stock: parseInt(document.getElementById('medStock').value, 10) || 0,
+      batch: document.getElementById('medBatch').value.trim(),
+      expiry: document.getElementById('medExpiry').value,
+      rx: document.getElementById('medRx').checked
+    };
+    if(!entry.name || entry.mrp <= 0){
+      showToast('Please enter at least a medicine name and MRP.', true);
+      return;
+    }
+    const idx = catalog.findIndex(p => p.id === id);
+    if(idx >= 0) catalog[idx] = entry; else catalog.push(entry);
+    const saved = await saveShared('catalog', catalog);
+    renderTable();
+    renderStats();
+    resetForm();
+    showToast(saved ? 'Medicine saved.' : 'Saved on screen, but could not persist.', !saved);
+  });
+
+  document.querySelectorAll('.admin-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const target = tab.dataset.atab;
+      document.getElementById('medsTab').style.display = (target === 'meds') ? 'block' : 'none';
+      document.getElementById('ordersTab').style.display = (target === 'orders') ? 'block' : 'none';
+      document.getElementById('payTab').style.display = (target === 'pay') ? 'block' : 'none';
+    });
+  });
+
+  document.getElementById('saveUpiBtn').addEventListener('click', async () => {
+    const upiId = document.getElementById('upiIdInput').value.trim();
+    settings.upiId = upiId;
+    const ok = await saveShared('settings', settings);
+    showToast(ok ? 'UPI ID saved.' : 'Could not save — please try again.', !ok);
+  });
+
+  // ---- orders ----
+  let orders = [];
+  const ORDER_STATUSES = ['Placed', 'Confirmed', 'Packed', 'Out for Delivery', 'Delivered', 'Cancelled'];
+
+  nmDb.collection('orders').orderBy('createdAt', 'desc').onSnapshot(snap => {
+    orders = snap.docs.map(d => d.data());
+    renderOrders();
+    renderSalesStats();
+  }, err => console.error('Orders sync error', err));
+
+  function isSameDay(ts, ref){
+    const a = new Date(ts), b = ref;
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+
+  function renderSalesStats(){
+    const today = new Date();
+    const todays = orders.filter(o => isSameDay(o.createdAt, today));
+    const todaysSales = todays.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+    const pending = orders.filter(o => o.status && o.status !== 'Delivered' && o.status !== 'Cancelled').length;
+    document.getElementById('statTodayOrders').textContent = todays.length;
+    document.getElementById('statTodaySales').textContent = '₹' + todaysSales;
+    document.getElementById('statPendingOrders').textContent = pending;
+  }
+
+  function renderOrders(){
+    const tbody = document.getElementById('ordersTableBody');
+    if(orders.length === 0){
+      tbody.innerHTML = '<tr><td colspan="8" style="color:var(--ink-soft);">No orders placed yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = orders.map(o => {
+      const itemsSummary = (o.items || []).map(it => `${escapeHtml(it.name)} x${it.qty}`).join(', ');
+      const statusOptions = ORDER_STATUSES.map(s => `<option value="${s}" ${o.status === s ? 'selected' : ''}>${s}</option>`).join('');
+      const placedDate = o.createdAt ? new Date(o.createdAt).toLocaleString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '—';
+      return `<tr data-order-id="${o.id}">
+        <td class="mono">${escapeHtml(o.id)}</td>
+        <td><span class="store-tag ${o.store === 'wholesale' ? 'wholesale' : ''}">${escapeHtml(o.store || '—')}</span></td>
+        <td>${escapeHtml(o.name || '')}<br><span style="color:var(--ink-soft);">${escapeHtml(o.phone || '')}</span></td>
+        <td style="max-width:220px;">${itemsSummary}</td>
+        <td>₹${o.total}</td>
+        <td>${o.payMethod === 'upi' ? 'Online' : 'COD'}</td>
+        <td><select class="order-status-select">${statusOptions}</select></td>
+        <td style="color:var(--ink-soft);font-size:11.5px;">${placedDate}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('ordersTableBody').addEventListener('change', async (e) => {
+    if(!e.target.classList.contains('order-status-select')) return;
+    const row = e.target.closest('tr');
+    const orderId = row.dataset.orderId;
+    const newStatus = e.target.value;
+    try{
+      await nmDb.collection('orders').doc(orderId).update({ status: newStatus });
+      showToast(`Order ${orderId} marked ${newStatus}.`);
+    }catch(err){
+      console.error('Status update failed', err);
+      showToast('Could not update status — please try again.', true);
+    }
+  });
+
+  // ---- login gate ----
+  const ADMIN_PASSWORD = 'navya2026';
+  document.getElementById('loginBtn').addEventListener('click', () => {
+    if(document.getElementById('passInput').value === ADMIN_PASSWORD){
+      document.getElementById('loginBox').style.display = 'none';
+      document.getElementById('adminMain').style.display = 'block';
+    } else {
+      document.getElementById('loginError').textContent = 'Wrong password, try again.';
+    }
+  });
+  document.getElementById('passInput').addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') document.getElementById('loginBtn').click();
+  });
+</script>
+
+</body>
+</html>
